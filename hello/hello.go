@@ -15,7 +15,7 @@ func main() {
 	log.SetFlags(0)
 
 	// A slice of names
-	names := []string{"gladys", "Jacob", "Taylin", "Sox"}
+	names := []string{"Gladys", "Jacob", "Taylin", "Sox"}
 
 	// Request greeting mesages for the names.
 	messages, err := greetings.Hellos(names)
