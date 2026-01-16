@@ -60,6 +60,16 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Printf("Album found: %v\n", alb)
+
+	albID, err := addAlbum(Album{
+		Title: "The White Album",
+		Artist: "the Beatles",
+		Price: 10.99,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("ID of added album: %v\n", albID)
 }
 
 // albumsByArtist queries for albums that have the specified artist name.
@@ -100,4 +110,23 @@ func albumById(id int64) (Album, error) {
 		return alb, fmt.Errorf("albumsById %d: %v", id, err)
 	}
 	return alb, nil
+}
+
+// addAlbum adds the specified album to the database,
+// returning the album ID of the new entry
+func addAlbum(alb Album) (int64, error) {
+    var id int64
+
+    err := db.QueryRow(context.Background(),
+        "INSERT INTO album (title, artist, price) VALUES ($1, $2, $3) RETURNING id",
+        alb.Title,
+        alb.Artist,
+        alb.Price,
+    ).Scan(&id)
+
+    if err != nil {
+        return 0, fmt.Errorf("addAlbum: %w", err)
+    }
+
+    return id, nil
 }
