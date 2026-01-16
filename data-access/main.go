@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -53,6 +54,12 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Printf("Albums found: %v\n", albums)
+
+	alb, err := albumById(2)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Album found: %v\n", alb)
 }
 
 // albumsByArtist queries for albums that have the specified artist name.
@@ -78,4 +85,19 @@ func albumsByArtist(name string) ([]Album, error) {
 		return nil, fmt.Errorf("albumsByArtist %q: %v", name, err)
 	}
 	return albums, nil
+}
+
+// albumByID queries for the album with the specified ID.
+func albumById(id int64) (Album, error) {
+	// an album to hold data from the returned row
+	var alb Album
+
+	row := db.QueryRow(context.Background(), "SELECT * FROM album WHERE id = $1", id)
+	if err := row.Scan(&alb.ID, &alb.Title, &alb.Artist, &alb.Price); err != nil {
+		if err == pgx.ErrNoRows {
+			return alb, fmt.Errorf("albumById %d: no such album", id)
+		}
+		return alb, fmt.Errorf("albumsById %d: %v", id, err)
+	}
+	return alb, nil
 }
